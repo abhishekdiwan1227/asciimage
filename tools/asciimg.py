@@ -9,10 +9,10 @@ TEXTURE = {
     1: " .",
     2: " ▫",
     3: " □",
-    4: " ░",
-    5: " ▒",
-    6: " ◙",
-    7: " ▪",
+    4: " o",
+    5: " 0",
+    6: " ▪",
+    7: " ◙",
     8: " ■",
     9: " ■",
     10: " █",
@@ -94,7 +94,7 @@ def generate_acsii_file(file):
         for j in range(ds_width):
             value = grad[i, j] / 255
             quantized_val = int(math.floor(value * 100) / 10)
-            final_val = 1 if quantized_val > 5 else 0
+            final_val = 1 if quantized_val > 7 else 0
             grad_x = gradient_x[i, j]
             grad_y = gradient_y[i, j]
             angle = numpy.atan2(grad_y, grad_x) * 180 / numpy.pi
@@ -113,7 +113,6 @@ def generate_acsii_file(file):
             ascii_img += TEXTURE[quantized_value] if edge_layer[i,j] == "" else edge_layer[i,j]
         ascii_img += "\n"
     save_ascii_img(output_file_path, ascii_img)
-    # save_ascii_img("test", ascii_img)
 
 
 def save_ascii_img(output_file_path, ascii_img):
