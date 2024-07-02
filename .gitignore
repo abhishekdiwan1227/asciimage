@@ -6,6 +6,7 @@ pyvenv.cfg
 result.txt
 output
 public
+dist
 
 node_modules
 
