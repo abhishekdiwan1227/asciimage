@@ -21,11 +21,11 @@ TEXTURE = {
 ARC = {
     0: " |",
     1: " /",
-    2: " _",
+    2: "--",
     3: " \\",
     4: " |",
     -1: " \\",
-    -2: " _",
+    -2: "--",
     -3: " /",
     -4: " |",
 }
@@ -37,10 +37,10 @@ OUTPUT_WIDTH = 160
 
 output_path = None
 
-
 def main():
-    start = time.time()
     try:
+        print("Starting processing.")
+        start = time.time()
         img_path = os.environ["IMG_PATH"]
         if img_path in ("", None):
             raise ValueError("File path not specified.")
@@ -62,8 +62,7 @@ def main():
         time_taken = end - start
         print(f"Time taken to convert {len(files)} files : {time_taken:.2f} seconds.")
     except Exception as e:
-        print(e)
-
+        print(f"Error: {e}")
 
 def generate_acsii_file(file):
     full_name, file_ext = os.path.splitext(file)
@@ -114,12 +113,10 @@ def generate_acsii_file(file):
         ascii_img += "\n"
     save_ascii_img(output_file_path, ascii_img)
 
-
 def save_ascii_img(output_file_path, ascii_img):
     fs = open(output_file_path, "w")
     fs.write(ascii_img)
     fs.close()
-
 
 if __name__ == "__main__":
     main()

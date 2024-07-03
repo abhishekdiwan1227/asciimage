@@ -42,9 +42,9 @@ app.route("/ascii").post(async (req, res, next) => {
 
     var outputFolder = path.join(destPath, "out")
 
-    var data = await processFile(destFile, outputFolder)
-
-    res.status(200).json(data)
+    await processFile(destFile, outputFolder)
+        .then(data => res.status(200).json(data))
+        .catch(err => res.status(500).json(err))
 })
 
 app.listen(port, () =>
