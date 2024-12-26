@@ -9,25 +9,30 @@ export function processFile(file: string, outputFolder: string) {
     process.env["IMG_PATH"] = file
     process.env["OUTPUT_PATH"] = outputFolder
 
-    // console.log(processorPath)
-    // console.log(fs.existsSync(processorPath))
-    // console.log(pythonPath)
-    // console.log(fs.existsSync(pythonPath))
+    const logPath = path.join(outputFolder, "asciimage.logs")
 
     return new Promise((res, rej) => {
         var asciiProcess = spawn(pythonPath, [processorPath])
         asciiProcess.stdout.setEncoding("utf-8")
         asciiProcess.stderr.setEncoding("utf-8")
 
+        if (!fs.existsSync(outputFolder)) { 
+            fs.mkdirSync(outputFolder)
+        }
+
+        var logWriter = fs.createWriteStream(logPath)
+
         asciiProcess.stdout.on("data", data => {
-            console.log(data)
+            logWriter.write(data + '\n')
         })
 
         asciiProcess.stderr.on("error", err => {
-            console.error(err)
+            logWriter.write(err + '\n')
         })
 
         asciiProcess.on("close", code => {
+            logWriter.end()
+
             if (code != 0) {
                 console.error(`[ERROR CODE] ${code}.`)
                 return rej(code)

@@ -37,6 +37,7 @@ OUTPUT_WIDTH = 160
 
 output_path = None
 
+
 def main():
     try:
         print("Starting processing.")
@@ -64,6 +65,7 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
 
+
 def generate_acsii_file(file):
     full_name, file_ext = os.path.splitext(file)
     file_name = os.path.basename(full_name)
@@ -77,6 +79,7 @@ def generate_acsii_file(file):
     ds_scale = max(img_width / OUTPUT_WIDTH, img_height / OUTPUT_HEIGHT)
     ds_height, ds_width = int(img_height / ds_scale), int(img_width / ds_scale)
     ds_img = cv2.resize(img, (ds_width, ds_height))
+    # ds_img = cv2.GaussianBlur(ds_img, (3, 3))
     src2 = cv2.cvtColor(ds_img, cv2.COLOR_BGR2GRAY)
     gradient_x = cv2.Sobel(
         src2, cv2.CV_16S, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT
@@ -84,9 +87,10 @@ def generate_acsii_file(file):
     gradient_y = cv2.Sobel(
         src2, cv2.CV_16S, 0, 1, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT
     )
-    abs_gradient_x, abs_gradient_y = cv2.convertScaleAbs(
-        gradient_x
-    ), cv2.convertScaleAbs(gradient_y)
+    abs_gradient_x, abs_gradient_y = (
+        cv2.convertScaleAbs(gradient_x),
+        cv2.convertScaleAbs(gradient_y),
+    )
     grad = cv2.addWeighted(abs_gradient_x, 0.5, abs_gradient_y, 0.5, 0)
     edge_layer = {}
     for i in range(ds_height):
@@ -101,22 +105,26 @@ def generate_acsii_file(file):
             edge_layer[(i, j)] = ARC[quantized_angle] if final_val > 0 else ""
     hsv_img = cv2.cvtColor(ds_img, cv2.COLOR_BGR2HSV)
     _, _, v = cv2.split(hsv_img)
-    if not os.path.exists(output_path):
-        os.mkdir(output_path)
-    output_file_path = os.path.join(output_path, f"{file_name}")
     ascii_img = ""
     for i in range(ds_height):
         for j in range(ds_width):
             value = int(v[i, j]) / 255
             quantized_value = int(math.floor(value * 100) / 10)
-            ascii_img += TEXTURE[quantized_value] if edge_layer[i,j] == "" else edge_layer[i,j]
+            ascii_img += (
+                TEXTURE[quantized_value] if edge_layer[i, j] == "" else edge_layer[i, j]
+            )
         ascii_img += "\n"
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+    output_file_path = os.path.join(output_path, f"{file_name}")
     save_ascii_img(output_file_path, ascii_img)
+
 
 def save_ascii_img(output_file_path, ascii_img):
     fs = open(output_file_path, "w")
     fs.write(ascii_img)
     fs.close()
+
 
 if __name__ == "__main__":
     main()

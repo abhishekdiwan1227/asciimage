@@ -20,6 +20,10 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.route("/health-check").get((req, res, next) => {
+    res.status(200).json("Service working.")
+})
+
 app.route("/ascii").post(async (req, res, next) => {
     if (!req.files || Object.keys(req.files).length == 0) {
         return res.status(400).json("No files selected.")
@@ -33,7 +37,7 @@ app.route("/ascii").post(async (req, res, next) => {
     var destPath = path.join(os.tmpdir(), "asciimage", "uploads", uuidv4())
 
     if (!fs.existsSync(destPath)) {
-        fs.mkdirSync(destPath, {recursive: true})
+        fs.mkdirSync(destPath, { recursive: true })
     }
 
     var destFile = path.join(destPath, file.name)
@@ -42,9 +46,16 @@ app.route("/ascii").post(async (req, res, next) => {
 
     var outputFolder = path.join(destPath, "out")
 
-    await processFile(destFile, outputFolder)
-        .then(data => res.status(200).json(data))
-        .catch(err => res.status(500).json(err))
+    try {
+        var data = await processFile(destFile, outputFolder)
+        res.status(200).json(data)
+    } catch (error) {
+        res.status(500).json(error)
+    } finally {
+        if (fs.existsSync(outputFolder)) {
+            fs.rmSync(outputFolder, {recursive: true, force: true})
+        }
+    }
 })
 
 app.listen(port, () =>

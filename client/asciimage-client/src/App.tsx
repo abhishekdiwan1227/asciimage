@@ -1,13 +1,26 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import './App.css'
-import { convertToAscii } from './services/asciimageService';
+import { convertToAscii, healthCheck } from './services/asciimageService';
 
 function App() {
 
   const title = "ASCI-I-MAGE"
 
   const [file, setFile] = useState<File>()
+  const [ready, setReady] = useState<boolean>(false)
   const [art, setAscii] = useState<string>()
+
+  useEffect(() => {
+    const api = async () => {
+      try {
+        await healthCheck()
+        setReady(true)
+      } catch (err) {
+        setReady(false)
+      }
+    }
+    api()
+  }, [])
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -25,6 +38,7 @@ function App() {
   };
 
   return (
+    ready ? 
     <>
       <div style={{
         height: '10dvh',
@@ -54,14 +68,15 @@ function App() {
           fontSize: 8,
           lineHeight: 1,
           width: 'fit-content',
-          color: '#ffffff',
-          backgroundColor: '#000000',
+          backgroundColor: '#033b0c',
+          color: '#cbb8f6',
           overflowY: 'hidden',
           textAlign: 'center',
           cursor: 'none'
         }}>{line}</div>)}
-      </div>
-    </>
+      </div> 
+    </> :
+    <h2>Service Unavailable</h2>
   )
 }
 
